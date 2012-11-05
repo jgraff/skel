@@ -1,0 +1,67 @@
+_HELP_DOC=
+_WORK_HOST=xsjhd-odin
+_WORK_USER=jgraff
+
+add_help()
+{
+    _HELP_DOC="$1 - $2:$_HELP_DOC"
+}
+
+func_help()
+{
+   OIFS=$IFS
+   IFS=:
+   for entry in $_HELP_DOC; do
+     printf "   %s\n" $entry
+   done
+   IFS=$OIFS
+}
+
+_RUN_RC=0
+_RUN_EXIT_ON_FAILURE=True
+
+add_help run "Intelligently execute a command"
+run()
+{
+   echo $*
+   $*
+   _rc=$?
+   if [ $_rc -ne $_RUN_RC ]; then
+       echo "$* ($_rc != $_RUN_RC)"
+       if [ "$_RUN_EXIT_ON_FAILURE" = "True" ]; then
+           exit 1
+       fi
+   fi
+}
+
+prompt()
+{
+    question=$1
+    while true; do
+        read -p "$question" resp
+        case $resp in
+            [Yy]*)
+                return 0;
+                ;;
+            [Nn]*)
+                return 1
+                ;;
+            *)
+                echo "Please answer Yes or No."
+                ;;
+        esac
+    done
+}
+
+
+add_help rsync_work_docs "Transfer Work docs to $_WORK_HOST"
+rsync_work_docs()
+{
+   rsync -av --delete --exclude private /Volumes/Work/docs $_WORK_USER@$_WORK_HOST:.
+}
+
+add_help git_push "Push current origin to master"
+git_push()
+{
+  git push origin master
+}
